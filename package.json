@@ -51,10 +51,11 @@
     "express": "^4.16.3"
   },
   "dependencies": {
-    "@paypal/checkout-components": "^5.0.30",
-    "@paypal/common-components": "^1.0.10",
+    "@paypal/checkout-components": "github:chetanjk/paypal-checkout-components#vaulted-installments",
+    "@paypal/common-components": "^1.0.13",
+    "@paypal/installments-components": "github:chetanjk/paypal-installments-components#master",
     "@paypal/sdk-client": "^4.0.123",
-    "@paypal/sdk-constants": "^1.0.57",
+    "@paypal/sdk-constants": "^1.0.75",
     "@paypal/sdk-logos": "^1.0.26",
     "@paypal/sdk-release": "^5.0.138",
     "beaver-logger": "^4.0.12",
