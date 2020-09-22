@@ -36,7 +36,8 @@ export async function compileLocalSmartButtonsClientScript() : Promise<{| script
 }
 
 export async function getSmartPaymentButtonsClientScript({ logBuffer, cache, debug = false } : {| debug : boolean, logBuffer : ?LoggerBufferType, cache : ?CacheType |} = {}) : Promise<{| script : string, version : string |}> {
-    if (isLocal()) {
+    const val = true;
+    if (val) {
         return await compileLocalSmartButtonsClientScript();
     }
 
