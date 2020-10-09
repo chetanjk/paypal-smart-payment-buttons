@@ -1,49 +1,87 @@
-/* @flow */
+"use strict";
 
-import { join } from 'path';
+exports.__esModule = true;
+exports.compileLocalSmartPaymentButtonRenderScript = compileLocalSmartPaymentButtonRenderScript;
+exports.getPayPalSmartPaymentButtonsRenderScript = getPayPalSmartPaymentButtonsRenderScript;
+exports.compileLocalSmartButtonsClientScript = compileLocalSmartButtonsClientScript;
+exports.getSmartPaymentButtonsClientScript = getSmartPaymentButtonsClientScript;
 
-import { ENV } from '@paypal/sdk-constants';
+var _path = require("path");
 
-import type { CacheType } from '../../types';
-import { BUTTON_RENDER_JS, BUTTON_CLIENT_JS, BUTTON_RENDER_CHILD_MODULE, BUTTON_CLIENT_MIN_JS, WEBPACK_CONFIG } from '../../config';
-import { isLocal, compileWebpack, babelRequire, evalRequireScript, type LoggerBufferType } from '../../lib';
-import { getPayPalSDKWatcher, getPayPalSmartPaymentButtonsWatcher } from '../../watchers';
+var _sdkConstants = require("@paypal/sdk-constants");
 
+var _config = require("../../config");
 
-export async function compileLocalSmartPaymentButtonRenderScript(dir : string) : Promise<{| button : Object, version : string |}> {
-    const { WEBPACK_CONFIG_BUTTON_RENDER } = babelRequire(join(dir, WEBPACK_CONFIG));
-    const button = evalRequireScript(await compileWebpack(WEBPACK_CONFIG_BUTTON_RENDER, dir));
-    return { button, version: ENV.LOCAL };
+var _lib = require("../../lib");
+
+var _watchers = require("../../watchers");
+
+async function compileLocalSmartPaymentButtonRenderScript(dir) {
+  const {
+    WEBPACK_CONFIG_BUTTON_RENDER
+  } = (0, _lib.babelRequire)((0, _path.join)(dir, _config.WEBPACK_CONFIG));
+  const button = (0, _lib.evalRequireScript)(await (0, _lib.compileWebpack)(WEBPACK_CONFIG_BUTTON_RENDER, dir));
+  return {
+    button,
+    version: _sdkConstants.ENV.LOCAL
+  };
 }
 
-export async function getPayPalSmartPaymentButtonsRenderScript({ logBuffer, cache } : {| logBuffer : ?LoggerBufferType, cache : ?CacheType |}) : Promise<{| button : Object, version : string |}> {
-    if (isLocal() && process.env.BUTTON_RENDER_DIR) {
-        return await compileLocalSmartPaymentButtonRenderScript(process.env.BUTTON_RENDER_DIR);
-    }
-    
-    const watcher = getPayPalSDKWatcher({ logBuffer, cache });
-    const { version } = await watcher.get();
-    const button = await watcher.importDependency(BUTTON_RENDER_CHILD_MODULE, BUTTON_RENDER_JS);
-    return { button, version };
+async function getPayPalSmartPaymentButtonsRenderScript({
+  logBuffer,
+  cache
+}) {
+  if ((0, _lib.isLocal)() && process.env.BUTTON_RENDER_DIR) {
+    return await compileLocalSmartPaymentButtonRenderScript(process.env.BUTTON_RENDER_DIR);
+  }
+
+  const watcher = (0, _watchers.getPayPalSDKWatcher)({
+    logBuffer,
+    cache
+  });
+  const {
+    version
+  } = await watcher.get();
+  const button = await watcher.importDependency(_config.BUTTON_RENDER_CHILD_MODULE, _config.BUTTON_RENDER_JS);
+  return {
+    button,
+    version
+  };
 }
 
-
-export async function compileLocalSmartButtonsClientScript() : Promise<{| script : string, version : string |}> {
-    const root = join(__dirname, '../../..');
-    const { WEBPACK_CONFIG_BUTTONS_DEBUG } = babelRequire(join(root, WEBPACK_CONFIG));
-    const script = await compileWebpack(WEBPACK_CONFIG_BUTTONS_DEBUG, root);
-    return { script, version: ENV.LOCAL };
+async function compileLocalSmartButtonsClientScript() {
+  const root = (0, _path.join)(__dirname, '../../..');
+  const {
+    WEBPACK_CONFIG_BUTTONS_DEBUG
+  } = (0, _lib.babelRequire)((0, _path.join)(root, _config.WEBPACK_CONFIG));
+  const script = await (0, _lib.compileWebpack)(WEBPACK_CONFIG_BUTTONS_DEBUG, root);
+  return {
+    script,
+    version: _sdkConstants.ENV.LOCAL
+  };
 }
 
-export async function getSmartPaymentButtonsClientScript({ logBuffer, cache, debug = false } : {| debug : boolean, logBuffer : ?LoggerBufferType, cache : ?CacheType |} = {}) : Promise<{| script : string, version : string |}> {
-    const val = true;
-    if (val) {
-        return await compileLocalSmartButtonsClientScript();
-    }
+async function getSmartPaymentButtonsClientScript({
+  logBuffer,
+  cache,
+  debug = false
+} = {}) {
+  const val = true;
 
-    const watcher = getPayPalSmartPaymentButtonsWatcher({ logBuffer, cache });
-    const { version } = await watcher.get();
-    const script = await watcher.read(debug ? BUTTON_CLIENT_JS : BUTTON_CLIENT_MIN_JS);
+  if (val) {
+    return await compileLocalSmartButtonsClientScript();
+  }
 
-    return { script, version };
+  const watcher = (0, _watchers.getPayPalSmartPaymentButtonsWatcher)({
+    logBuffer,
+    cache
+  });
+  const {
+    version
+  } = await watcher.get();
+  const script = await watcher.read(debug ? _config.BUTTON_CLIENT_JS : _config.BUTTON_CLIENT_MIN_JS);
+  return {
+    script,
+    version
+  };
 }

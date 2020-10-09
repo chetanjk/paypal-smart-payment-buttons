@@ -1,29 +1,50 @@
-/* @flow */
+"use strict";
 
-import { join } from 'path';
+exports.__esModule = true;
+exports.compileLocalSmartMenuClientScript = compileLocalSmartMenuClientScript;
+exports.getSmartMenuClientScript = getSmartMenuClientScript;
 
-import { ENV } from '@paypal/sdk-constants';
+var _path = require("path");
 
-import type { CacheType } from '../../types';
-import { MENU_CLIENT_JS, MENU_CLIENT_MIN_JS, WEBPACK_CONFIG } from '../../config';
-import { isLocal, compileWebpack, babelRequire, type LoggerBufferType } from '../../lib';
-import { getPayPalSmartPaymentButtonsWatcher } from '../../watchers';
+var _sdkConstants = require("@paypal/sdk-constants");
 
-export async function compileLocalSmartMenuClientScript() : Promise<{| script : string, version : string |}> {
-    const root = join(__dirname, '../../..');
-    const { WEBPACK_CONFIG_MENU_DEBUG } = babelRequire(join(root, WEBPACK_CONFIG));
-    const script = await compileWebpack(WEBPACK_CONFIG_MENU_DEBUG, root);
-    return { script, version: ENV.LOCAL };
+var _config = require("../../config");
+
+var _lib = require("../../lib");
+
+var _watchers = require("../../watchers");
+
+async function compileLocalSmartMenuClientScript() {
+  const root = (0, _path.join)(__dirname, '../../..');
+  const {
+    WEBPACK_CONFIG_MENU_DEBUG
+  } = (0, _lib.babelRequire)((0, _path.join)(root, _config.WEBPACK_CONFIG));
+  const script = await (0, _lib.compileWebpack)(WEBPACK_CONFIG_MENU_DEBUG, root);
+  return {
+    script,
+    version: _sdkConstants.ENV.LOCAL
+  };
 }
 
-export async function getSmartMenuClientScript({ logBuffer, cache, debug = false } : {| debug : boolean, logBuffer : ?LoggerBufferType, cache : ?CacheType |} = {}) : Promise<{| script : string, version : string |}> {
-    if (isLocal()) {
-        return await compileLocalSmartMenuClientScript();
-    }
+async function getSmartMenuClientScript({
+  logBuffer,
+  cache,
+  debug = false
+} = {}) {
+  if ((0, _lib.isLocal)()) {
+    return await compileLocalSmartMenuClientScript();
+  }
 
-    const watcher = getPayPalSmartPaymentButtonsWatcher({ logBuffer, cache });
-    const { version } = await watcher.get();
-    const script = await watcher.read(debug ? MENU_CLIENT_JS : MENU_CLIENT_MIN_JS);
-
-    return { script, version };
+  const watcher = (0, _watchers.getPayPalSmartPaymentButtonsWatcher)({
+    logBuffer,
+    cache
+  });
+  const {
+    version
+  } = await watcher.get();
+  const script = await watcher.read(debug ? _config.MENU_CLIENT_JS : _config.MENU_CLIENT_MIN_JS);
+  return {
+    script,
+    version
+  };
 }
