@@ -1,47 +1,55 @@
-/* @flow */
+"use strict";
 
-import { ENV, FUNDING } from '@paypal/sdk-constants';
+exports.__esModule = true;
+exports.shouldRenderFraudnet = shouldRenderFraudnet;
+exports.renderFraudnetScript = renderFraudnetScript;
 
-import { FNCLS, FRAUDNET_ID } from '../config';
-import { safeJSON } from '../lib';
-import type { Wallet } from '../../src/types';
+var _sdkConstants = require("@paypal/sdk-constants");
+
+var _config = require("../config");
+
+var _lib = require("../lib");
 
 const FRAUDNET_URL = {
-    [ ENV.LOCAL ]:      'https://www.msmaster.qa.paypal.com/en_US/m/fb-raw.js',
-    [ ENV.STAGE ]:      'https://www.msmaster.qa.paypal.com/en_US/m/fb-raw.js',
-    [ ENV.SANDBOX ]:    'https://c.paypal.com/da/r/fb.js',
-    [ ENV.PRODUCTION ]: 'https://c.paypal.com/da/r/fb.js',
-    [ ENV.TEST ]:       'https://c.paypal.com/da/r/fb.js'
+  [_sdkConstants.ENV.LOCAL]: 'https://www.msmaster.qa.paypal.com/en_US/m/fb-raw.js',
+  [_sdkConstants.ENV.STAGE]: 'https://www.msmaster.qa.paypal.com/en_US/m/fb-raw.js',
+  [_sdkConstants.ENV.SANDBOX]: 'https://c.paypal.com/da/r/fb.js',
+  [_sdkConstants.ENV.PRODUCTION]: 'https://c.paypal.com/da/r/fb.js',
+  [_sdkConstants.ENV.TEST]: 'https://c.paypal.com/da/r/fb.js'
 };
 
-export function shouldRenderFraudnet({ wallet } : {| wallet : Wallet |}) : boolean {
-    for (const fundingSource of Object.values(FUNDING)) {
-        // $FlowFixMe
-        const walletConfig = wallet && wallet[fundingSource];
+function shouldRenderFraudnet({
+  wallet
+}) {
+  for (const fundingSource of Object.values(_sdkConstants.FUNDING)) {
+    // $FlowFixMe
+    const walletConfig = wallet && wallet[fundingSource];
 
-        if (walletConfig && walletConfig.instruments && walletConfig.instruments.length) {
-            if (walletConfig.instruments.some(instrument => {
-                return instrument && instrument.tokenID;
-            })) {
-                return true;
-            }
-        }
+    if (walletConfig && walletConfig.instruments && walletConfig.instruments.length) {
+      if (walletConfig.instruments.some(instrument => {
+        return instrument && instrument.tokenID;
+      })) {
+        return true;
+      }
     }
+  }
 
-    return false;
+  return false;
 }
 
-export function renderFraudnetScript({ id, cspNonce, env } : {| id : string, cspNonce : string, env : $Values<typeof ENV> |}) : string {
-
-    const fraudnetConfig = {
-        f: id,
-        s: FRAUDNET_ID
-    };
-
-    return `
-        <script nonce="${ cspNonce }" type="application/json" id="fconfig" fncls="${ FNCLS }">
-            ${ safeJSON(fraudnetConfig) }
+function renderFraudnetScript({
+  id,
+  cspNonce,
+  env
+}) {
+  const fraudnetConfig = {
+    f: id,
+    s: _config.FRAUDNET_ID
+  };
+  return `
+        <script nonce="${cspNonce}" type="application/json" id="fconfig" fncls="${_config.FNCLS}">
+            ${(0, _lib.safeJSON)(fraudnetConfig)}
         </script>
-        <script nonce="${ cspNonce }" type="text/javascript" src="${ FRAUDNET_URL[env] }" async></script>
+        <script nonce="${cspNonce}" type="text/javascript" src="${FRAUDNET_URL[env]}" async></script>
     `;
 }

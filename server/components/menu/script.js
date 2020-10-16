@@ -1,57 +1,70 @@
-/* @flow */
+"use strict";
 
-import { join } from 'path';
+exports.__esModule = true;
+exports.compileLocalSmartMenuClientScript = compileLocalSmartMenuClientScript;
+exports.getSmartMenuClientScript = getSmartMenuClientScript;
 
-import { ENV } from '@paypal/sdk-constants';
+var _path = require("path");
 
-import type { CacheType } from '../../types';
-import { MENU_CLIENT_JS, MENU_CLIENT_MIN_JS, WEBPACK_CONFIG, ACTIVE_TAG, MENU_CLIENT_MODULE } from '../../config';
-import { isLocal, compileWebpack, babelRequire, resolveScript, dynamicRequire, type LoggerBufferType } from '../../lib';
-import { getPayPalSmartPaymentButtonsWatcher } from '../../watchers';
+var _sdkConstants = require("@paypal/sdk-constants");
 
-const ROOT = join(__dirname, '../../..');
+var _config = require("../../config");
 
-type SmartMenuClientScript = {|
-    script : string,
-    version : string
-|};
+var _lib = require("../../lib");
 
-export async function compileLocalSmartMenuClientScript() : Promise<?SmartMenuClientScript> {
-    const webpackScriptPath = resolveScript(join(ROOT, WEBPACK_CONFIG));
+var _watchers = require("../../watchers");
 
-    if (webpackScriptPath && isLocal()) {
-        const { WEBPACK_CONFIG_MENU_DEBUG } = babelRequire(webpackScriptPath);
-        const script = await compileWebpack(WEBPACK_CONFIG_MENU_DEBUG, ROOT);
-        return { script, version: ENV.LOCAL };
-    }
+const ROOT = (0, _path.join)(__dirname, '../../..');
 
-    const distScriptPath = resolveScript(join(MENU_CLIENT_MODULE, MENU_CLIENT_JS));
+async function compileLocalSmartMenuClientScript() {
+  const webpackScriptPath = (0, _lib.resolveScript)((0, _path.join)(ROOT, _config.WEBPACK_CONFIG));
 
-    if (distScriptPath) {
-        const script = dynamicRequire(distScriptPath);
-        return { script, version: ENV.LOCAL };
-    }
+  if (webpackScriptPath && (0, _lib.isLocal)()) {
+    const {
+      WEBPACK_CONFIG_MENU_DEBUG
+    } = (0, _lib.babelRequire)(webpackScriptPath);
+    const script = await (0, _lib.compileWebpack)(WEBPACK_CONFIG_MENU_DEBUG, ROOT);
+    return {
+      script,
+      version: _sdkConstants.ENV.LOCAL
+    };
+  }
+
+  const distScriptPath = (0, _lib.resolveScript)((0, _path.join)(_config.MENU_CLIENT_MODULE, _config.MENU_CLIENT_JS));
+
+  if (distScriptPath) {
+    const script = (0, _lib.dynamicRequire)(distScriptPath);
+    return {
+      script,
+      version: _sdkConstants.ENV.LOCAL
+    };
+  }
 }
 
-type GetSmartMenuClientScriptOptions = {|
-    debug : boolean,
-    logBuffer : ?LoggerBufferType,
-    cache : ?CacheType,
-    useLocal? : boolean
-|};
+async function getSmartMenuClientScript({
+  logBuffer,
+  cache,
+  debug = false,
+  useLocal = (0, _lib.isLocal)()
+} = {}) {
+  if (useLocal) {
+    const script = await compileLocalSmartMenuClientScript();
 
-export async function getSmartMenuClientScript({ logBuffer, cache, debug = false, useLocal = isLocal() } : GetSmartMenuClientScriptOptions = {}) : Promise<SmartMenuClientScript> {
-    if (useLocal) {
-        const script = await compileLocalSmartMenuClientScript();
-
-        if (script) {
-            return script;
-        }
+    if (script) {
+      return script;
     }
+  }
 
-    const watcher = getPayPalSmartPaymentButtonsWatcher({ logBuffer, cache });
-    const { version } = await watcher.get(ACTIVE_TAG);
-    const script = await watcher.read(debug ? MENU_CLIENT_JS : MENU_CLIENT_MIN_JS);
-
-    return { script, version };
+  const watcher = (0, _watchers.getPayPalSmartPaymentButtonsWatcher)({
+    logBuffer,
+    cache
+  });
+  const {
+    version
+  } = await watcher.get(_config.ACTIVE_TAG);
+  const script = await watcher.read(debug ? _config.MENU_CLIENT_JS : _config.MENU_CLIENT_MIN_JS);
+  return {
+    script,
+    version
+  };
 }

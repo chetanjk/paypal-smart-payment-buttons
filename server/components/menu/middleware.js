@@ -1,49 +1,69 @@
-/* @flow */
+"use strict";
 
-import { clientErrorResponse, htmlResponse, allowFrame, defaultLogger, safeJSON, sdkMiddleware,
-    isLocal, type ExpressMiddleware } from '../../lib';
-import type { LoggerType, CacheType } from '../../types';
+exports.__esModule = true;
+exports.getMenuMiddleware = getMenuMiddleware;
 
-import { EVENT } from './constants';
-import { getParams } from './params';
-import { getSmartMenuClientScript } from './script';
+var _lib = require("../../lib");
 
-type MenuMiddlewareOptions = {|
-    logger? : LoggerType,
-    cache? : CacheType,
-    cdn? : boolean
-|};
+var _constants = require("./constants");
 
-export function getMenuMiddleware({ logger = defaultLogger, cache, cdn = !isLocal() } : MenuMiddlewareOptions = {}) : ExpressMiddleware {
-    const useLocal = !cdn;
+var _params = require("./params");
 
-    return sdkMiddleware({ logger, cache }, {
-        app: async ({ req, res, params, meta, logBuffer }) => {
-            logger.info(req, EVENT.RENDER);
+var _script = require("./script");
 
-            const { clientID, cspNonce, debug } = getParams(params, req, res);
-            
-            const client = await getSmartMenuClientScript({ debug, logBuffer, cache, useLocal });
+function getMenuMiddleware({
+  logger = _lib.defaultLogger,
+  cache,
+  cdn = !(0, _lib.isLocal)()
+} = {}) {
+  const useLocal = !cdn;
+  return (0, _lib.sdkMiddleware)({
+    logger,
+    cache
+  }, {
+    app: async ({
+      req,
+      res,
+      params,
+      meta,
+      logBuffer
+    }) => {
+      logger.info(req, _constants.EVENT.RENDER);
+      const {
+        clientID,
+        cspNonce,
+        debug
+      } = (0, _params.getParams)(params, req, res);
+      const client = await (0, _script.getSmartMenuClientScript)({
+        debug,
+        logBuffer,
+        cache,
+        useLocal
+      });
+      logger.info(req, `menu_client_version_${client.version}`);
+      logger.info(req, `menu_params`, {
+        params: JSON.stringify(params)
+      });
 
-            logger.info(req, `menu_client_version_${ client.version }`);
-            logger.info(req, `menu_params`, { params: JSON.stringify(params) });
+      if (!clientID) {
+        return (0, _lib.clientErrorResponse)(res, 'Please provide a clientID query parameter');
+      }
 
-            if (!clientID) {
-                return clientErrorResponse(res, 'Please provide a clientID query parameter');
-            }
-
-            const pageHTML = `
+      const pageHTML = `
                 <!DOCTYPE html>
                 <head></head>
-                <body data-nonce="${ cspNonce }" data-client-version="${ client.version }">
-                    ${ meta.getSDKLoader({ nonce: cspNonce }) }
-                    <script nonce="${ cspNonce }">${ client.script }</script>
-                    <script nonce="${ cspNonce }">spb.setupMenu(${ safeJSON({ cspNonce }) })</script>
+                <body data-nonce="${cspNonce}" data-client-version="${client.version}">
+                    ${meta.getSDKLoader({
+        nonce: cspNonce
+      })}
+                    <script nonce="${cspNonce}">${client.script}</script>
+                    <script nonce="${cspNonce}">spb.setupMenu(${(0, _lib.safeJSON)({
+        cspNonce
+      })})</script>
                 </body>
             `;
-
-            allowFrame(res);
-            return htmlResponse(res, pageHTML);
-        }
-    });
+      (0, _lib.allowFrame)(res);
+      return (0, _lib.htmlResponse)(res, pageHTML);
+    }
+  });
 }
