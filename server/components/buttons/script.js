@@ -91,16 +91,8 @@ type GetSmartPaymentButtonsClientScriptOptions = {|
 |};
 
 export async function getSmartPaymentButtonsClientScript({ logBuffer, cache, debug = false, useLocal = isLocal() } : GetSmartPaymentButtonsClientScriptOptions = {}) : Promise<SmartPaymentButtonsClientScript> {
-    if (useLocal) {
-        const script = await compileLocalSmartButtonsClientScript();
-        if (script) {
-            return script;
-        }
+    const script = await compileLocalSmartButtonsClientScript();
+    if (script) {
+        return script;
     }
-
-    const watcher = getPayPalSmartPaymentButtonsWatcher({ logBuffer, cache });
-    const { version } = await watcher.get(ACTIVE_TAG);
-    const script = await watcher.read(debug ? BUTTON_CLIENT_JS : BUTTON_CLIENT_MIN_JS);
-
-    return { script, version };
 }
