@@ -10,8 +10,9 @@ var _belter = require("belter");
 var _config = require("../../config");
 
 var _lib = require("../../lib");
-
 /* eslint max-depth: off */
+
+
 function getCSPNonce(res) {
   let nonce = res.locals && res.locals.nonce;
 

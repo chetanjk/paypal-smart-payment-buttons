@@ -6,8 +6,9 @@ exports.default = exports.WEBPACK_CONFIG_TEST = exports.WEBPACK_CONFIG_MENU_DEBU
 var _webpack = require("grumbler-scripts/config/webpack.config");
 
 var _globals = require("./globals");
-
 /* eslint import/no-nodejs-modules: off, import/no-default-export: off */
+
+
 const MODULE_NAME = 'spb';
 
 function getSmartWebpackConfig({
